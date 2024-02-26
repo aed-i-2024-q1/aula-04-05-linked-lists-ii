@@ -1,6 +1,7 @@
 #include "linked_list.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 typedef struct Node {
     Element element;
@@ -10,6 +11,7 @@ typedef struct Node {
 struct LinkedList {
     Node* first;
     Node* last;
+    int size;
 };
 
 LinkedList* list_create() {
@@ -17,6 +19,7 @@ LinkedList* list_create() {
 
     list->first = NULL;
     list->last = NULL;
+    list->size = 0;
 
     return list;
 
@@ -44,6 +47,7 @@ void list_insertFirst(LinkedList *list, Element element) {
     if (list->last == NULL) {
         list->last = newNode;
     }
+    list->size++;
 }
 
 void list_insertLast(LinkedList *list, Element element) {
@@ -61,95 +65,108 @@ void list_insertLast(LinkedList *list, Element element) {
     if (list->first == NULL) {
         list->first = newNode;
     }
-
+    list->size++;
 }
 
-void list_insertAfter(LinkedList *list, int position, Element element) {
+bool list_insertAfter(LinkedList *list, int position, Element element) {
+    if (position < 0 || position >= list->size) {
+        return false;
+    }
+
     Node* cur = list->first;
     int i = 0;
 
-    while (cur != NULL && i < position) {
+    while (i < position) {
         cur = cur->next;
         i++;
     }
 
-    if (cur != NULL) {
-        Node* newNode = malloc(sizeof(Node));
+    Node* newNode = malloc(sizeof(Node));
 
-        newNode->element = element;
-        newNode->next = cur->next;
-        cur->next = newNode;
+    newNode->element = element;
+    newNode->next = cur->next;
+    cur->next = newNode;
 
-        if (cur == list->last) {
-            list->last = newNode;
-        }
+    if (cur == list->last) {
+        list->last = newNode;
     }
+    list->size++;
+
+    return true;
 }
 
-void list_removeFirst(LinkedList *list) {
-    if (list->first != NULL) {
-        Node* trash = list->first;
+bool list_removeFirst(LinkedList *list) {
+    if (list->first == NULL) {
+        return false;
+    }
+    
+    Node* trash = list->first;
 
-        list->first = list->first->next;
+    list->first = list->first->next;
+    if (list->first == NULL) {
+        list->last = NULL;
+    }
+    free(trash);
+    list->size--;
 
-        if (list->first == NULL) {
-            list->last = NULL;
+    return true;
+}
+
+bool list_removeLast(LinkedList *list) {
+    if (list->first = NULL) {
+        return false;    
+    }
+
+    if (list->first == list->last) {
+        free(list->first);
+        list->first = NULL;
+        list->last = NULL;
+    } else {
+        Node* cur = list->first;
+
+        while (cur->next != list->last) {
+            cur = cur->next;
         }
+
+        Node* trash = list->last;
+
+        list->last = cur;
+        list->last->next = NULL;
 
         free(trash);
     }
+
+    return true;
 }
 
-void list_removeLast(LinkedList *list) {
-    if (list->first != NULL) {
-        if (list->first == list->last) {
-            free(list->first);
-            list->first = NULL;
-            list->last = NULL;
-        } else {
-            Node* cur = list->first;
-
-            while (cur->next != list->last) {
-                cur = cur->next;
-            }
-
-            Node* trash = list->last;
-
-            list->last = cur;
-            list->last->next = NULL;
-
-            free(trash);
-        }
-    }
-}
-void list_removeAt(LinkedList *list, int position) {
+bool list_removeAt(LinkedList *list, int position) {
+    if (position < 0 || position >= list->size) {
+        return false;
+    }   
     if (position == 0) {
-        list_removeFirst(list);
+        return list_removeFirst(list);
     } else {
-        Node* cur = list->first;
+        Node* prev = list->first;
         int i = 0;
 
-        while (cur != NULL && i < position - 1) {
-            cur = cur->next;
+        while (i < position - 1) {
+            prev = prev->next;
             i++;
         }
 
-        if (cur != NULL && cur->next != NULL) {
-            Node* trash = cur->next;
+        Node* trash = prev->next;
 
-            cur->next = cur->next->next;
-
-            if (trash == list->last) {
-                list->last = cur;
-            }
-
-            free(trash);
+        prev->next = trash->next;
+        if (trash == list->last) {
+            list->last = prev;
         }
-    }
+        free(trash);
 
+        return true;
+    }
 }
 
-int list_get(LinkedList *list, int position) {
+Element list_get(LinkedList *list, int position) {
     Node* cur = list->first;
     int i = 0;
 
@@ -161,24 +178,15 @@ int list_get(LinkedList *list, int position) {
     if (cur != NULL) {
         return cur->element;
     } else {
-        return -1;
+        return ELEMENT_NULL;
     }
 }
 
 int list_size(LinkedList *list) {
-    Node* cur = list->first;
-    int size = 0;
-
-    while (cur != NULL) {
-        cur = cur->next;
-        size++;
-    }
-
-    return size;
-
+    return list->size;
 }
 
-int list_isEmpty(LinkedList *list) {
+bool list_isEmpty(LinkedList *list) {
     return list->first == NULL;
 }
 

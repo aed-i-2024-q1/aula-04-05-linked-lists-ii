@@ -2,10 +2,10 @@
 
 #include <stdio.h>
 
-void element_print(Element* element) {
-    printf("%d", *element);
+void element_print(Element element) {
+    printf("%d", element);
 }
 
-int element_compare(Element* element1, Element* element2) {
-    return *element1 - *element2;
+int element_compare(Element element1, Element element2) {
+    return element1 - element2;
 }

@@ -129,10 +129,15 @@ void test_insertExtremities() {
 
 int main() {
     test_insert();
+    printf("\n");
     test_removeFirst();
+    printf("\n");
     test_removeAt();
+    printf("\n");
     test_insertLast();
+    printf("\n");
     test_insertFirst();
+    printf("\n");
     test_insertExtremities();
 
     return 0;
